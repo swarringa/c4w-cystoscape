@@ -1,0 +1,6 @@
+Bundle-ManifestVersion: 2
+Bundle-Version: 1.0.0
+Bundle-Name: ClarionTXA
+Bundle-SymbolicName: ClarionTXA
+Bundle-Activator: nl.practicom.c4w.cytoscape.CyActivator
+Export-Package: nl.practicom.c4w.cytoscape.*

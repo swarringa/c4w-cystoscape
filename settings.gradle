@@ -1,0 +1,3 @@
+rootProject.name = 'c4w-cytoscape'
+include 'c4w-osgi-rte'
+

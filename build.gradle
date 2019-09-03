@@ -1,19 +1,6 @@
-import aQute.bnd.gradle.Bundle
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:4.2.0'
-    }
-}
-
 plugins {
     id 'groovy'
 }
-
-apply plugin: 'biz.aQute.bnd.builder'
 
 group 'nl.practicom'
 version '1.0-SNAPSHOT'
@@ -39,12 +26,9 @@ dependencies {
     compile "org.cytoscape:service-api:$cytoscapeVersion"
     compile "org.osgi:org.osgi.core:$osgiVersion"
     compile "org.osgi:org.osgi.util.tracker:1.5.2"
-    compile "biz.aQute.bnd:biz.aQute.bnd.annotation:2.4.0"
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.28'
+    compile "nl.practicom:c4w-multidll:0.1"
+    compile "nl.practicom:c4w-txa:0.1"
     testCompile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.28'
     testCompile "junit:junit:4.12"
-}
-
-task bundle(type: Bundle) {
-    from sourceSets.main.output
 }

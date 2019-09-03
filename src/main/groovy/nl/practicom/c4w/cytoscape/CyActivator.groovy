@@ -1,18 +1,39 @@
 package nl.practicom.c4w.cytoscape
 
-import org.cytoscape.application.CyApplicationManager
-import org.cytoscape.application.swing.CyAction
+import org.cytoscape.model.CyNetworkFactory
+import org.cytoscape.model.CyNetworkManager
 import org.cytoscape.service.util.AbstractCyActivator
+import org.cytoscape.session.CyNetworkNaming
+import org.cytoscape.view.model.CyNetworkViewFactory
+import org.cytoscape.view.model.CyNetworkViewManager
+import org.cytoscape.work.TaskFactory
 import org.osgi.framework.BundleContext
 
 class CyActivator extends AbstractCyActivator {
     CyActivator() {
-        super()
+        super();
     }
 
+
     void start(BundleContext bc) {
-        CyApplicationManager cyApplicationManager = getService(bc, CyApplicationManager.class)
-        GetSelectedNodesAction getSelectedNodesAction = new GetSelectedNodesAction(cyApplicationManager)
-        registerService(bc,getSelectedNodesAction,CyAction.class,new Properties())
+
+        CyNetworkManager cyNetworkManagerServiceRef = getService(bc,CyNetworkManager.class)
+        CyNetworkNaming cyNetworkNamingServiceRef = getService(bc,CyNetworkNaming.class)
+        CyNetworkFactory cyNetworkFactoryServiceRef = getService(bc,CyNetworkFactory.class)
+        CyNetworkViewFactory cyNetworkViewFactoryServiceRef = getService(bc,CyNetworkViewFactory.class)
+        CyNetworkViewManager cyNetworkViewManagerServiceRef = getService(bc,CyNetworkViewManager.class)
+
+        CreateNetworkTaskFactory createNetworkTaskFactory = new CreateNetworkTaskFactory(
+          cyNetworkManagerServiceRef,
+          cyNetworkNamingServiceRef,
+          cyNetworkFactoryServiceRef,
+          cyNetworkViewFactoryServiceRef,
+          cyNetworkViewManagerServiceRef
+        )
+
+        Properties props = new Properties()
+        props.setProperty("preferredMenu","Apps.Practicom")
+        props.setProperty("title","Import TXA")
+        registerService(bc,createNetworkTaskFactory,TaskFactory.class, props)
     }
 }

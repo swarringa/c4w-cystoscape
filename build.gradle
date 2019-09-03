@@ -23,7 +23,13 @@ dependencies {
     compile "org.codehaus.groovy:groovy-all:2.3.11"
     compile "org.cytoscape:swing-application-api:$cytoscapeVersion"
     compile "org.cytoscape:work-api:$cytoscapeVersion"
+    compile "org.cytoscape:work-impl:$cytoscapeVersion"
+    compile "org.cytoscape:work-swing-api:$cytoscapeVersion"
+    compile "org.cytoscape:work-swing-impl:$cytoscapeVersion"
+    compile "org.cytoscape:work-headless-impl:$cytoscapeVersion"
     compile "org.cytoscape:service-api:$cytoscapeVersion"
+    compile "org.cytoscape:io-api:$cytoscapeVersion"
+//    compile "org.cytoscape:io-impl:$cytoscapeVersion"
     compile "org.osgi:org.osgi.core:$osgiVersion"
     compile "org.osgi:org.osgi.util.tracker:1.5.2"
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.28'

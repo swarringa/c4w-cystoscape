@@ -87,10 +87,10 @@ class CytoscapeTxaNetworkReader extends AbstractCyNetworkReader {
     net.getDefaultNodeTable().getAllRows().each { row ->
       def suid = row.get(pk, Long.class)
       def node = net.getNode(suid)
-      def procedureName = row.get("name", String.class)
+      def nodeName = row.get("name", String.class) ?: "?"
       View<CyNode> view = cnv.getNodeView(node)
-      view.setVisualProperty(BasicVisualLexicon.NODE_LABEL, procedureName)
-      view.setVisualProperty(BasicVisualLexicon.NODE_WIDTH, procedureName.size() * 10.0d)
+      view.setVisualProperty(BasicVisualLexicon.NODE_LABEL, nodeName)
+      view.setVisualProperty(BasicVisualLexicon.NODE_WIDTH, nodeName.size() * 10.0d)
       view.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.ROUND_RECTANGLE)
       view.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.CYAN)
     }

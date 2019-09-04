@@ -1,13 +1,15 @@
 plugins {
     id 'groovy'
+    id 'ivy-publish'
+    id 'idea'
 }
 
 group 'nl.practicom'
-version '1.0-SNAPSHOT'
+version '0.1'
 
 ext {
     osgiVersion = '4.2.0'
-    cytoscapeVersion = '3.0.0'
+    cytoscapeVersion = '3.7.1'
     slf4jVersion = '1.6.1'
 }
 
@@ -17,11 +19,27 @@ repositories {
         name ='Cytoscape releases'
         url = 'http://code.cytoscape.org/nexus/content/repositories/releases'
     }
+    maven {
+        name = 'Cytoscape snapshots'
+        url = 'http://code.cytoscape.org/nexus/content/repositories/snapshots/'
+    }
+    ivy {
+        url project.property('publishing.repo.url')
+        patternLayout {
+            artifact "[organisation]/[module]/[type]s/[artifact]-[revision].[ext]"
+            ivy "[organisation]/[module]/ivy-[revision].[ext]"
+        }
+    }
+    flatDir {
+        name = "locallib"
+        dirs './lib'
+    }
 }
 
 dependencies {
     compile "org.codehaus.groovy:groovy-all:2.3.11"
     compile "org.cytoscape:swing-application-api:$cytoscapeVersion"
+    compile "org.cytoscape:app-api:$cytoscapeVersion"
     compile "org.cytoscape:work-api:$cytoscapeVersion"
     compile "org.cytoscape:work-impl:$cytoscapeVersion"
     compile "org.cytoscape:work-swing-api:$cytoscapeVersion"
@@ -29,7 +47,7 @@ dependencies {
     compile "org.cytoscape:work-headless-impl:$cytoscapeVersion"
     compile "org.cytoscape:service-api:$cytoscapeVersion"
     compile "org.cytoscape:io-api:$cytoscapeVersion"
-//    compile "org.cytoscape:io-impl:$cytoscapeVersion"
+    compile "org.cytoscape:io-impl:$cytoscapeVersion"
     compile "org.osgi:org.osgi.core:$osgiVersion"
     compile "org.osgi:org.osgi.util.tracker:1.5.2"
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.28'
@@ -37,4 +55,24 @@ dependencies {
     compile "nl.practicom:c4w-txa:0.1"
     testCompile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.28'
     testCompile "junit:junit:4.12"
+}
+
+publishing {
+    repositories {
+        ivy {
+            url project.property('publishing.repo.url')
+            patternLayout {
+                artifact "[organisation]/[module]/[type]s/[artifact]-[revision].[ext]"
+                ivy "[organisation]/[module]/ivy-[revision].[ext]"
+            }
+        }
+    }
+    publications {
+        ivy(IvyPublication) {
+            organisation = group
+            module = rootProject.name
+            revision = version
+            from components.java
+        }
+    }
 }

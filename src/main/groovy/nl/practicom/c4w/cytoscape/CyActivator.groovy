@@ -1,50 +1,86 @@
 package nl.practicom.c4w.cytoscape
 
+import static org.cytoscape.work.ServiceProperties.ID;
+
+import nl.practicom.c4w.cytoscape.io.internal.txareader.CytoscapeTxaFileFilter
+import nl.practicom.c4w.cytoscape.io.internal.txareader.CytoscapeTxaNetworkReaderFactory
 import org.cytoscape.application.CyApplicationManager
-import org.cytoscape.event.CyEventHelper
+import org.cytoscape.group.CyGroupFactory
+import org.cytoscape.io.DataCategory
+import org.cytoscape.io.read.InputStreamTaskFactory
+import org.cytoscape.io.util.StreamUtil
 import org.cytoscape.model.CyNetworkFactory
 import org.cytoscape.model.CyNetworkManager
+import org.cytoscape.model.subnetwork.CyRootNetworkManager
 import org.cytoscape.service.util.AbstractCyActivator
-import org.cytoscape.session.CyNetworkNaming
+import org.cytoscape.view.layout.CyLayoutAlgorithmManager
 import org.cytoscape.view.model.CyNetworkViewFactory
-import org.cytoscape.view.model.CyNetworkViewManager
+import org.cytoscape.view.presentation.RenderingEngineManager
+import org.cytoscape.view.vizmap.VisualMappingFunctionFactory
 import org.cytoscape.view.vizmap.VisualMappingManager
-import org.cytoscape.work.TaskFactory
+import org.cytoscape.view.vizmap.VisualStyleFactory
 import org.osgi.framework.BundleContext
 
 class CyActivator extends AbstractCyActivator {
     CyActivator() {
-        super();
+        super()
     }
 
-
     void start(BundleContext bc) {
+        /** Imported services */
 
-        final CyNetworkManager cyNetworkManagerServiceRef = getService(bc,CyNetworkManager.class)
-        final CyNetworkNaming cyNetworkNamingServiceRef = getService(bc,CyNetworkNaming.class)
-        final CyNetworkFactory cyNetworkFactoryServiceRef = getService(bc,CyNetworkFactory.class)
-        final CyNetworkViewFactory cyNetworkViewFactoryServiceRef = getService(bc,CyNetworkViewFactory.class)
-        final CyNetworkViewManager cyNetworkViewManagerServiceRef = getService(bc,CyNetworkViewManager.class)
+        final CyApplicationManager applicationManager = getService(bc,CyApplicationManager.class)
+        final CyRootNetworkManager rootNetworkManager = getService(bc, CyRootNetworkManager.class)
+        final CyNetworkManager networkManager = getService(bc,CyNetworkManager.class)
+        final CyNetworkFactory networkFactory = getService(bc, CyNetworkFactory.class)
+        final CyNetworkViewFactory networkViewFactory = getService(bc,CyNetworkViewFactory.class)
+        final VisualMappingManager visualMappingManager = getService(bc,VisualMappingManager.class)
+        final RenderingEngineManager renderingEngineManager = getService(bc, RenderingEngineManager.class)
+        final VisualStyleFactory visualStyleFactory = getService(bc, VisualStyleFactory.class)
+        final CyGroupFactory groupFactory = getService(bc, CyGroupFactory.class)
+        final CyLayoutAlgorithmManager layoutManager = getService(bc, CyLayoutAlgorithmManager.class)
 
-        final CyApplicationManager cyApplicationManagerServiceRef = getService(bc,CyApplicationManager.class);
-        final VisualMappingManager vmmServiceRef = getService(bc,VisualMappingManager.class)
-        final CyEventHelper cyEventHelper = getService(bc, CyEventHelper.class)
+        final VisualMappingFunctionFactory vmfFactoryC =
+            getService(bc, VisualMappingFunctionFactory.class,"(mapping.type=continuous)")
 
+        final VisualMappingFunctionFactory vmfFactoryD =
+            getService(bc, VisualMappingFunctionFactory.class,"(mapping.type=discrete)")
 
-        CreateNetworkTaskFactory createNetworkTaskFactory = new CreateNetworkTaskFactory(
-          cyNetworkManagerServiceRef,
-          cyNetworkNamingServiceRef,
-          cyNetworkFactoryServiceRef,
-          cyNetworkViewFactoryServiceRef,
-          cyNetworkViewManagerServiceRef,
-          cyApplicationManagerServiceRef,
-          vmmServiceRef,
-          cyEventHelper
+        final VisualMappingFunctionFactory vmfFactoryP =
+            getService(bc, VisualMappingFunctionFactory.class,"(mapping.type=passthrough)")
+
+        final StreamUtil streamUtil = getService(bc, StreamUtil.class)
+
+        /** Provided services */
+
+        final CytoscapeTxaFileFilter txaFilter = new CytoscapeTxaFileFilter(
+          ['txa'] as Set<String>,
+          ['text/plain'] as Set<String>,
+          "Clarion TXA file",
+          DataCategory.NETWORK,
+          streamUtil
         )
 
-        Properties props = new Properties()
-        props.setProperty("preferredMenu","Apps.Practicom")
-        props.setProperty("title","Import TXA")
-        registerService(bc,createNetworkTaskFactory,TaskFactory.class, props)
+        final CytoscapeTxaNetworkReaderFactory txaReadeFactory = new CytoscapeTxaNetworkReaderFactory(
+          txaFilter,
+          applicationManager,
+          networkFactory,
+          networkManager,
+          rootNetworkManager,
+          visualMappingManager,
+          visualStyleFactory,
+          groupFactory,
+          renderingEngineManager,
+          networkViewFactory,
+          vmfFactoryC,
+          vmfFactoryD,
+          vmfFactoryP,
+          layoutManager
+        )
+
+        final Properties reader_factory_properties = new Properties()
+        reader_factory_properties.put(ID, "cytoscapeTxaNetworkReaderFactory")
+        registerService(bc, txaReadeFactory, InputStreamTaskFactory.class, reader_factory_properties)
+
     }
 }

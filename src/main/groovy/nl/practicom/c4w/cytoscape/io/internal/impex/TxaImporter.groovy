@@ -9,7 +9,7 @@ import org.cytoscape.model.CyNode
 
 final class TxaImporter {
 
-  def procedureNodeSuids = []
+  def procedureNodeSuids = [:]
   def menuNodeSuids = [:]
 
   def importTxa(CyNetwork net, InputStream txaInputStream) {
@@ -25,24 +25,24 @@ final class TxaImporter {
 
     addProcedureNodes(procedureScanner, dependencyScanner, net)
     addMenuNodes(entryScanner, net)
-    //connectMenuToProcedures(entryScanner, net, dependencyScanner)
+    connectMenuToProcedures(entryScanner, net, dependencyScanner)
   }
 
   def addProcedureNodes(ProcedureInfoScanner procedureScanner, ProcedureDependencyScanner dependencyScanner, net) {
     dependencyScanner.dependencies.eachWithIndex { procedureName, _, idx ->
       CyNode node = net.addNode();
       net.getDefaultNodeTable().getRow(node.getSUID()).set(CyNetwork.NAME, procedureName as String);
-      procedureNodeSuids[idx] = node.getSUID()
+      procedureNodeSuids[procedureName] = node.getSUID()
     }
 
-    dependencyScanner.dependencies.eachWithIndex { _, dependentProcedures, sourceIdx ->
-      def sourceSUID = procedureNodeSuids[sourceIdx]
+    dependencyScanner.dependencies.eachWithIndex { procedureName, dependentProcedures, sourceIdx ->
+      def sourceSUID = procedureNodeSuids[procedureName]
       def sourceNode = net.getNode(sourceSUID)
       def sourceName = net.getDefaultNodeTable().getRow(sourceNode.getSUID()).get(CyNetwork.NAME, String.class);
 
       dependentProcedures.each { dependentProcedure ->
-        def targetIdx = dependencyScanner.dependencies.findIndexOf { it.key == dependentProcedure }
-        def targetSUID = procedureNodeSuids[targetIdx]
+        //def targetIdx = dependencyScanner.dependencies.findIndexOf { it.key == dependentProcedure }
+        def targetSUID = procedureNodeSuids[dependentProcedure]
         def targetNode = net.getNode(targetSUID)
         def edge = net.addEdge(sourceNode, targetNode, true)
         net.getDefaultEdgeTable().getRow(edge.getSUID()).set(CyNetwork.NAME, "${sourceName}::${dependentProcedure}" as String)
@@ -87,10 +87,9 @@ final class TxaImporter {
           def menuNode = net.getNode(menuNodeSuids[child])
           def entryProcedures = entryScanner.entryProceduresFor(child)
           entryProcedures.each { procedure ->
-            //Todo: access by name, not index
             def procedureNode = net.getNode(procedureNodeSuids[procedure])
             if (menuNode && procedureNode) {
-              net.addEdge(menuNode, procedureNode)
+              net.addEdge(menuNode, procedureNode, true)
             }
           }
         }

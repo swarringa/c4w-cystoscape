@@ -11,6 +11,14 @@ final class TxaImporter {
 
   def procedureNodeSuids = [:]
   def menuNodeSuids = [:]
+  def menuRootSuid = null
+  def mainProcedure = null
+  def mainMenuProcedure = null
+  def importMenu = false
+
+  TxaImporter(boolean importMenu) {
+    this.importMenu = importMenu
+  }
 
   def importTxa(CyNetwork net, InputStream txaInputStream) {
 
@@ -19,13 +27,20 @@ final class TxaImporter {
     def entryScanner = new EntryProcedureScanner()
 
     new StreamingTxaReader()
+      .withHandler(procedureScanner)
       .withHandler(dependencyScanner)
       .withHandler(entryScanner)
       .parse(txaInputStream)
 
+    mainProcedure = procedureScanner.getMainProcedure()?.name
+    mainMenuProcedure = entryScanner.procedureName
+
     addProcedureNodes(procedureScanner, dependencyScanner, net)
-    addMenuNodes(entryScanner, net)
-    connectMenuToProcedures(entryScanner, net, dependencyScanner)
+
+    if ( importMenu ) {
+      addMenuNodes(entryScanner, net)
+      connectMenuToProcedures(entryScanner, net, dependencyScanner)
+    }
   }
 
   def addProcedureNodes(ProcedureInfoScanner procedureScanner, ProcedureDependencyScanner dependencyScanner, net) {
@@ -35,28 +50,45 @@ final class TxaImporter {
       procedureNodeSuids[procedureName] = node.getSUID()
     }
 
+    // Connect procedure nodes
     dependencyScanner.dependencies.eachWithIndex { procedureName, dependentProcedures, sourceIdx ->
-      def sourceSUID = procedureNodeSuids[procedureName]
-      def sourceNode = net.getNode(sourceSUID)
-      def sourceName = net.getDefaultNodeTable().getRow(sourceNode.getSUID()).get(CyNetwork.NAME, String.class);
+      // When menutree is imported the procedure containing the menu tree wll be connected to the menubar only
+      if (!importMenu || procedureName != mainMenuProcedure ) {
+        def sourceSUID = procedureNodeSuids[procedureName]
+        def sourceNode = net.getNode(sourceSUID)
+        def sourceName = net.getDefaultNodeTable().getRow(sourceNode.getSUID()).get(CyNetwork.NAME, String.class);
 
-      dependentProcedures.each { dependentProcedure ->
-        //def targetIdx = dependencyScanner.dependencies.findIndexOf { it.key == dependentProcedure }
-        def targetSUID = procedureNodeSuids[dependentProcedure]
-        def targetNode = net.getNode(targetSUID)
-        def edge = net.addEdge(sourceNode, targetNode, true)
-        net.getDefaultEdgeTable().getRow(edge.getSUID()).set(CyNetwork.NAME, "${sourceName}::${dependentProcedure}" as String)
+        dependentProcedures.each { dependentProcedure ->
+          //def targetIdx = dependencyScanner.dependencies.findIndexOf { it.key == dependentProcedure }
+          def targetSUID = procedureNodeSuids[dependentProcedure]
+          def targetNode = net.getNode(targetSUID)
+          def edge = net.addEdge(sourceNode, targetNode, true)
+          net.getDefaultEdgeTable().getRow(edge.getSUID()).set(CyNetwork.NAME, "${sourceName}::${dependentProcedure}" as String)
+        }
       }
+    }
+
+    // Create link from application to the main procedure
+    if ( procedureScanner.getMainProcedure() ) {
+      def applicationNode = net.getNode(procedureNodeSuids['APPLICATION'])
+      def mainProcedureNode = net.getNode(procedureNodeSuids[procedureScanner.mainProcedure.name])
+      def mainEdge = net.addEdge(applicationNode, mainProcedureNode, true)
+      net.getDefaultEdgeTable().getRow(mainEdge.getSUID()).set(CyNetwork.NAME, "main_procedure" as String)
     }
   }
 
   def addMenuNodes(EntryProcedureScanner entryScanner, net) {
+    // First add all menu parent nodes
     entryScanner.menuTree.eachWithIndex { menuEntry, _, idx ->
       CyNode menuNode = net.addNode();
       net.getDefaultNodeTable().getRow(menuNode.getSUID()).set(CyNetwork.NAME, menuEntry)
       menuNodeSuids[menuEntry] = menuNode.getSUID()
+      if ( entryScanner.menuRoot == menuEntry){
+        menuRootSuid = menuNode.getSUID()
+      }
     }
 
+    // Link the children to their parents
     entryScanner.menuTree.eachWithIndex { menuEntry, children, _ ->
       def menuNodeSuid = menuNodeSuids[menuEntry]
       def menuNode = net.getNode(menuNodeSuid)
@@ -77,6 +109,14 @@ final class TxaImporter {
           }
         }
       }
+    }
+
+    //Link the procedure containing the menubar to the menubar root
+    def mainMenuProcedureNode = net.getNode(procedureNodeSuids[mainMenuProcedure])
+    def menubarNode = net.getNode(menuRootSuid)
+    if ( mainMenuProcedureNode && menubarNode) {
+      def edge = net.addEdge(mainMenuProcedureNode, menubarNode, true)
+      net.getDefaultEdgeTable().getRow(edge.getSUID()).set(CyNetwork.NAME, "menubar" as String)
     }
   }
 

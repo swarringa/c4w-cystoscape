@@ -19,9 +19,11 @@ import org.cytoscape.view.presentation.property.NodeShapeVisualProperty
 import org.cytoscape.view.vizmap.VisualMappingFunctionFactory
 import org.cytoscape.view.vizmap.VisualMappingManager
 import org.cytoscape.view.vizmap.VisualStyleFactory
+import org.cytoscape.work.ProvidesTitle
 import org.cytoscape.work.TaskMonitor
+import org.cytoscape.work.Tunable
 
-import java.awt.Color;
+import java.awt.Color
 
 class CytoscapeTxaNetworkReader extends AbstractCyNetworkReader {
 
@@ -39,6 +41,12 @@ class CytoscapeTxaNetworkReader extends AbstractCyNetworkReader {
   private final CyGroupFactory               _group_factory
   private final CyLayoutAlgorithmManager    layoutManager
   private TaskMonitor                       parentTaskMonitor
+
+  @Tunable(description = "Import menu")
+  public Boolean importMenu = false
+
+  @ProvidesTitle
+  String getTitle() { "Import Clarion TXA file as network" }
 
   CytoscapeTxaNetworkReader(
           final String network_collection_name,
@@ -58,10 +66,10 @@ class CytoscapeTxaNetworkReader extends AbstractCyNetworkReader {
           final boolean perform_basic_integrity_checks,
           final CyLayoutAlgorithmManager layoutManager) throws IOException {
 
-    super(input_stream, networkview_factory, network_factory, network_manager, root_network_manager);
+    super(input_stream, networkview_factory, network_factory, network_manager, root_network_manager)
 
     if (inputStream == null) {
-      throw new IllegalArgumentException("input stream must not be null");
+      throw new IllegalArgumentException("input stream must not be null")
     }
     _in = inputStream
     _network_collection_name = network_collection_name
@@ -80,7 +88,7 @@ class CytoscapeTxaNetworkReader extends AbstractCyNetworkReader {
 
   @Override
   CyNetworkView buildCyNetworkView(CyNetwork net) {
-    CyNetworkView cnv = _networkview_factory.createNetworkView(net);
+    CyNetworkView cnv = _networkview_factory.createNetworkView(net)
 
     def pk = net.getDefaultNodeTable().getPrimaryKey().getName()
 
@@ -89,10 +97,10 @@ class CytoscapeTxaNetworkReader extends AbstractCyNetworkReader {
       def node = net.getNode(suid)
       def nodeName = row.get("name", String.class) ?: "?"
       View<CyNode> view = cnv.getNodeView(node)
-      view.setVisualProperty(BasicVisualLexicon.NODE_LABEL, nodeName)
-      view.setVisualProperty(BasicVisualLexicon.NODE_WIDTH, nodeName.size() * 10.0d)
-      view.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.ROUND_RECTANGLE)
-      view.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.CYAN)
+      view.setLockedValue(BasicVisualLexicon.NODE_LABEL, nodeName)
+      view.setLockedValue(BasicVisualLexicon.NODE_WIDTH, nodeName.size() * 10.0d)
+      view.setLockedValue(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.ROUND_RECTANGLE)
+      view.setLockedValue(BasicVisualLexicon.NODE_FILL_COLOR, Color.CYAN)
     }
 
     return cnv
@@ -100,19 +108,19 @@ class CytoscapeTxaNetworkReader extends AbstractCyNetworkReader {
 
   @Override
   void run(TaskMonitor taskMonitor) throws Exception {
-    CyNetwork net = super.cyNetworkFactory.createNetwork();
-    net.getRow(net)?.set(CyNetwork.NAME, _network_collection_name);
-    new TxaImporter().importTxa(net, _in)
+    CyNetwork net = super.cyNetworkFactory.createNetwork()
+    net.getRow(net)?.set(CyNetwork.NAME, _network_collection_name)
+    new TxaImporter(this.importMenu).importTxa(net, this._in)
     _networks.push(net)
   }
 
   @Override
   CyNetwork[] getNetworks() {
-    final CyNetwork[] results = new CyNetwork[_networks.size()];
+    final CyNetwork[] results = new CyNetwork[_networks.size()]
     for (int i = 0; i < results.length; ++i) {
-      results[i] = _networks.get(i);
+      results[i] = _networks.get(i)
     }
-    return results;
+    return results
   }
 
 }

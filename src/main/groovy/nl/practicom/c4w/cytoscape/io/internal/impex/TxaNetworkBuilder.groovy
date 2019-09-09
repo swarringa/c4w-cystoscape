@@ -1,13 +1,19 @@
 package nl.practicom.c4w.cytoscape.io.internal.impex
 
+import nl.practicom.c4w.cytoscape.io.internal.Constants
 import nl.practicom.c4w.multidll.EntryProcedureScanner
 import nl.practicom.c4w.multidll.ProcedureDependencyScanner
 import nl.practicom.c4w.multidll.ProcedureInfoScanner
-import nl.practicom.c4w.txa.transform.StreamingTxaReader
 import org.cytoscape.model.CyNetwork
 import org.cytoscape.model.CyNode
+import org.cytoscape.model.CyTable
 
-final class TxaImporter {
+import static nl.practicom.c4w.cytoscape.io.internal.Constants.NAMESPACE
+import static nl.practicom.c4w.cytoscape.io.internal.Constants.NodeType.MENU
+import static nl.practicom.c4w.cytoscape.io.internal.Constants.NodeType.PROCEDURE
+import static nl.practicom.c4w.cytoscape.io.internal.Constants.ProcedureTableColumn.*
+
+final class TxaNetworkBuilder {
 
   def procedureNodeSuids = [:]
   def menuNodeSuids = [:]
@@ -15,22 +21,23 @@ final class TxaImporter {
   def mainProcedure = null
   def mainMenuProcedure = null
   def importMenu = false
+  def tableFactory
+  def tableMapper
 
-  TxaImporter(boolean importMenu) {
-    this.importMenu = importMenu
+  ProcedureInfoScanner procedureScanner
+  ProcedureDependencyScanner dependencyScanner
+  EntryProcedureScanner entryScanner
+
+  TxaNetworkBuilder(
+        ProcedureInfoScanner procedureScanner,
+        ProcedureDependencyScanner dependencyScanner,
+        EntryProcedureScanner entryScanner ) {
+    this.procedureScanner = procedureScanner
+    this.dependencyScanner = dependencyScanner
+    this.entryScanner = entryScanner
   }
 
-  def importTxa(CyNetwork net, InputStream txaInputStream) {
-
-    def procedureScanner = new ProcedureInfoScanner()
-    def dependencyScanner = new ProcedureDependencyScanner()
-    def entryScanner = new EntryProcedureScanner()
-
-    new StreamingTxaReader()
-      .withHandler(procedureScanner)
-      .withHandler(dependencyScanner)
-      .withHandler(entryScanner)
-      .parse(txaInputStream)
+  def importTxa(CyNetwork net, boolean importMenu) {
 
     mainProcedure = procedureScanner.getMainProcedure()?.name
     mainMenuProcedure = entryScanner.procedureName
@@ -41,12 +48,14 @@ final class TxaImporter {
       addMenuNodes(entryScanner, net)
       connectMenuToProcedures(entryScanner, net, dependencyScanner)
     }
+
+    addNodeAttributes(net, procedureScanner)
   }
 
   def addProcedureNodes(ProcedureInfoScanner procedureScanner, ProcedureDependencyScanner dependencyScanner, net) {
+
     dependencyScanner.dependencies.eachWithIndex { procedureName, _, idx ->
       CyNode node = net.addNode();
-      net.getDefaultNodeTable().getRow(node.getSUID()).set(CyNetwork.NAME, procedureName as String);
       procedureNodeSuids[procedureName] = node.getSUID()
     }
 
@@ -81,7 +90,6 @@ final class TxaImporter {
     // First add all menu parent nodes
     entryScanner.menuTree.eachWithIndex { menuEntry, _, idx ->
       CyNode menuNode = net.addNode();
-      net.getDefaultNodeTable().getRow(menuNode.getSUID()).set(CyNetwork.NAME, menuEntry)
       menuNodeSuids[menuEntry] = menuNode.getSUID()
       if ( entryScanner.menuRoot == menuEntry){
         menuRootSuid = menuNode.getSUID()
@@ -99,7 +107,6 @@ final class TxaImporter {
             childNode = net.getNode(menuNodeSuids[child])
           } else {
             childNode = net.addNode()
-            net.getDefaultNodeTable().getRow(childNode.getSUID()).set(CyNetwork.NAME, child)
             menuNodeSuids[child] = childNode.SUID
           }
 
@@ -134,6 +141,32 @@ final class TxaImporter {
           }
         }
       }
+    }
+  }
+
+  def addNodeAttributes(CyNetwork net, ProcedureInfoScanner procedureScanner){
+    CyTable table = net.getDefaultNodeTable()
+
+    table.with {
+      Constants.ProcedureTableColumn.values().each { column ->
+        createColumn(NAMESPACE,column.columnName, column.columnType,column.immutable)
+      }
+    }
+
+    procedureScanner.procedures.each { procInfo ->
+      def row = table.getRow(procedureNodeSuids[procInfo.name])
+
+      row.set(CyNetwork.NAME, procInfo.name)
+      row.set(NAMESPACE, NODETYPE.columnName, PROCEDURE.value)
+      row.set(NAMESPACE, TEMPLATE.columnName, procInfo.template)
+      row.set(NAMESPACE, NOEXPORT.columnName,!procInfo.isExported)
+      row.set(NAMESPACE, MAIN_PROCEDURE.columnName, procInfo.isMainProcedure)
+    }
+
+    menuNodeSuids.each { menuName, suid ->
+      def row = table.getRow(suid)
+      row.set(CyNetwork.NAME, menuName)
+      row.set(NAMESPACE,NODETYPE.columnName, MENU.value)
     }
   }
 }

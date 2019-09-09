@@ -1,6 +1,10 @@
 package nl.practicom.c4w.cytoscape.io.internal.txareader
 
-import nl.practicom.c4w.cytoscape.io.internal.impex.TxaImporter
+import nl.practicom.c4w.cytoscape.io.internal.impex.TxaNetworkBuilder
+import nl.practicom.c4w.multidll.EntryProcedureScanner
+import nl.practicom.c4w.multidll.ProcedureDependencyScanner
+import nl.practicom.c4w.multidll.ProcedureInfoScanner
+import nl.practicom.c4w.txa.transform.StreamingTxaReader
 import org.cytoscape.application.CyApplicationManager
 import org.cytoscape.group.CyGroupFactory
 import org.cytoscape.io.read.AbstractCyNetworkReader
@@ -23,17 +27,18 @@ import org.cytoscape.work.ProvidesTitle
 import org.cytoscape.work.TaskMonitor
 import org.cytoscape.work.Tunable
 
-import java.awt.Color
+import java.awt.*
+import java.util.List
 
 class CytoscapeTxaNetworkReader extends AbstractCyNetworkReader {
 
+  private final CyApplicationManager         _application_manager
   private final List<CyNetwork>              _networks
   private String                             _network_collection_name
   private final InputStream                  _in
   private final VisualMappingManager         _visual_mapping_manager
   private final RenderingEngineManager       _rendering_engine_manager
   private final CyNetworkViewFactory         _networkview_factory
-  private final boolean                      _perform_basic_integrity_checks
   private final VisualStyleFactory           _visual_style_factory
   private final VisualMappingFunctionFactory _vmf_factory_c
   private final VisualMappingFunctionFactory _vmf_factory_d
@@ -63,7 +68,6 @@ class CytoscapeTxaNetworkReader extends AbstractCyNetworkReader {
           final VisualMappingFunctionFactory vmf_factory_c,
           final VisualMappingFunctionFactory vmf_factory_d,
           final VisualMappingFunctionFactory vmf_factory_p,
-          final boolean perform_basic_integrity_checks,
           final CyLayoutAlgorithmManager layoutManager) throws IOException {
 
     super(input_stream, networkview_factory, network_factory, network_manager, root_network_manager)
@@ -78,7 +82,6 @@ class CytoscapeTxaNetworkReader extends AbstractCyNetworkReader {
     _networkview_factory = networkview_factory
     _group_factory = group_factory
     _networks = new ArrayList<CyNetwork>()
-    _perform_basic_integrity_checks = perform_basic_integrity_checks
     _visual_style_factory = visual_style_factory
     _vmf_factory_c = vmf_factory_c
     _vmf_factory_d = vmf_factory_d
@@ -108,9 +111,19 @@ class CytoscapeTxaNetworkReader extends AbstractCyNetworkReader {
 
   @Override
   void run(TaskMonitor taskMonitor) throws Exception {
+    def procedureScanner = new ProcedureInfoScanner()
+    def dependencyScanner = new ProcedureDependencyScanner()
+    def entryScanner = new EntryProcedureScanner()
+
+    new StreamingTxaReader()
+      .withHandler(procedureScanner)
+      .withHandler(dependencyScanner)
+      .withHandler(entryScanner)
+      .parse(_in)
+
     CyNetwork net = super.cyNetworkFactory.createNetwork()
     net.getRow(net)?.set(CyNetwork.NAME, _network_collection_name)
-    new TxaImporter(this.importMenu).importTxa(net, this._in)
+    new TxaNetworkBuilder(procedureScanner,dependencyScanner,entryScanner).importTxa(net, importMenu)
     _networks.push(net)
   }
 

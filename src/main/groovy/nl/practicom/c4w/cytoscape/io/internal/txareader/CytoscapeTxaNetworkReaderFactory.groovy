@@ -17,7 +17,6 @@ import org.cytoscape.work.TaskIterator
 
 class CytoscapeTxaNetworkReaderFactory extends AbstractInputStreamTaskFactory {
 
-  private static final boolean               PERFORM_BASIC_INTEGRITY_CHECKS = true
   private  CyApplicationManager _application_manager
   protected  CyNetworkFactory _network_factory
   private  CyNetworkManager _network_manager
@@ -32,7 +31,7 @@ class CytoscapeTxaNetworkReaderFactory extends AbstractInputStreamTaskFactory {
   private  VisualMappingFunctionFactory _vmf_factory_p
   private  CyLayoutAlgorithmManager layoutManager
 
-  CytoscapeTxaNetworkReaderFactory(
+   CytoscapeTxaNetworkReaderFactory(
           final CyFileFilter filter,
           final CyApplicationManager application_manager,
           final CyNetworkFactory network_factory,
@@ -84,7 +83,7 @@ class CytoscapeTxaNetworkReaderFactory extends AbstractInputStreamTaskFactory {
                 _vmf_factory_c,
                 _vmf_factory_d,
                 _vmf_factory_p,
-                PERFORM_BASIC_INTEGRITY_CHECKS, layoutManager
+                layoutManager
         )
       )
     }

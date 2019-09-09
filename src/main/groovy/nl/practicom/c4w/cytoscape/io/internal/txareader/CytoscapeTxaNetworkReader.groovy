@@ -1,5 +1,6 @@
 package nl.practicom.c4w.cytoscape.io.internal.txareader
 
+
 import nl.practicom.c4w.cytoscape.io.internal.impex.TxaNetworkBuilder
 import nl.practicom.c4w.multidll.EntryProcedureScanner
 import nl.practicom.c4w.multidll.ProcedureDependencyScanner
@@ -13,6 +14,7 @@ import org.cytoscape.model.CyNetworkFactory
 import org.cytoscape.model.CyNetworkManager
 import org.cytoscape.model.CyNode
 import org.cytoscape.model.subnetwork.CyRootNetworkManager
+import org.cytoscape.model.subnetwork.CySubNetwork
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager
 import org.cytoscape.view.model.CyNetworkView
 import org.cytoscape.view.model.CyNetworkViewFactory
@@ -30,6 +32,9 @@ import org.cytoscape.work.Tunable
 import java.awt.*
 import java.util.List
 
+import static nl.practicom.c4w.cytoscape.io.internal.Constants.NAMESPACE
+import static nl.practicom.c4w.cytoscape.io.internal.Constants.NetworkTableColumn.SOURCETXA
+
 class CytoscapeTxaNetworkReader extends AbstractCyNetworkReader {
 
   private final CyApplicationManager         _application_manager
@@ -46,6 +51,8 @@ class CytoscapeTxaNetworkReader extends AbstractCyNetworkReader {
   private final CyGroupFactory               _group_factory
   private final CyLayoutAlgorithmManager    layoutManager
   private TaskMonitor                       parentTaskMonitor
+
+  private final String txaFilePath
 
   @Tunable(description = "Import menu")
   public Boolean importMenu = false
@@ -76,6 +83,8 @@ class CytoscapeTxaNetworkReader extends AbstractCyNetworkReader {
       throw new IllegalArgumentException("input stream must not be null")
     }
     _in = inputStream
+    this.txaFilePath = (_in.in as FileInputStream).path
+
     _network_collection_name = network_collection_name
     _visual_mapping_manager = visual_mapping_manager
     _rendering_engine_manager = rendering_engine_manager
@@ -111,6 +120,9 @@ class CytoscapeTxaNetworkReader extends AbstractCyNetworkReader {
 
   @Override
   void run(TaskMonitor taskMonitor) throws Exception {
+    taskMonitor.setTitle("Import Clarion TXA")
+    taskMonitor.setStatusMessage("Importing ${txaFilePath} as network")
+
     def procedureScanner = new ProcedureInfoScanner()
     def dependencyScanner = new ProcedureDependencyScanner()
     def entryScanner = new EntryProcedureScanner()
@@ -124,6 +136,13 @@ class CytoscapeTxaNetworkReader extends AbstractCyNetworkReader {
     CyNetwork net = super.cyNetworkFactory.createNetwork()
     net.getRow(net)?.set(CyNetwork.NAME, _network_collection_name)
     new TxaNetworkBuilder(procedureScanner,dependencyScanner,entryScanner).importTxa(net, importMenu)
+
+    // We need to attach the source txa to the network so we can retrieve it when generating target txa's
+    def rootNetwork = (net as CySubNetwork).rootNetwork
+    def localAttrs = rootNetwork.getTable(CyNetwork.class, CyNetwork.LOCAL_ATTRS)
+    localAttrs.createColumn(NAMESPACE, SOURCETXA.columnName,SOURCETXA.columnType,SOURCETXA.immutable)
+    localAttrs.getRow(rootNetwork.SUID).set(SOURCETXA.fqn,this.txaFilePath)
+
     _networks.push(net)
   }
 

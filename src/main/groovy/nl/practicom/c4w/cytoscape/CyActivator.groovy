@@ -1,9 +1,8 @@
 package nl.practicom.c4w.cytoscape
 
-import static org.cytoscape.work.ServiceProperties.ID;
-
 import nl.practicom.c4w.cytoscape.io.internal.txareader.CytoscapeTxaFileFilter
 import nl.practicom.c4w.cytoscape.io.internal.txareader.CytoscapeTxaNetworkReaderFactory
+import nl.practicom.c4w.cytoscape.io.internal.writer.TxaNetworkWriterFactory
 import org.cytoscape.application.CyApplicationManager
 import org.cytoscape.group.CyGroupFactory
 import org.cytoscape.io.DataCategory
@@ -20,6 +19,8 @@ import org.cytoscape.view.vizmap.VisualMappingFunctionFactory
 import org.cytoscape.view.vizmap.VisualMappingManager
 import org.cytoscape.view.vizmap.VisualStyleFactory
 import org.osgi.framework.BundleContext
+
+import static org.cytoscape.work.ServiceProperties.ID
 
 class CyActivator extends AbstractCyActivator {
     CyActivator() {
@@ -77,6 +78,11 @@ class CyActivator extends AbstractCyActivator {
           vmfFactoryP,
           layoutManager
         )
+
+        final txaWriterFactory = new TxaNetworkWriterFactory(txaFilter)
+        final Properties writer_factory_properties = new Properties()
+        writer_factory_properties.put(ID, "txaNetworkWriterFactory")
+        registerAllServices(bc, txaWriterFactory, writer_factory_properties)
 
         final Properties reader_factory_properties = new Properties()
         reader_factory_properties.put(ID, "cytoscapeTxaNetworkReaderFactory")

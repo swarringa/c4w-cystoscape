@@ -21,8 +21,6 @@ final class TxaNetworkBuilder {
   def mainProcedure = null
   def mainMenuProcedure = null
   def importMenu = false
-  def tableFactory
-  def tableMapper
 
   ProcedureInfoScanner procedureScanner
   ProcedureDependencyScanner dependencyScanner
@@ -119,11 +117,13 @@ final class TxaNetworkBuilder {
     }
 
     //Link the procedure containing the menubar to the menubar root
-    def mainMenuProcedureNode = net.getNode(procedureNodeSuids[mainMenuProcedure])
-    def menubarNode = net.getNode(menuRootSuid)
-    if ( mainMenuProcedureNode && menubarNode) {
-      def edge = net.addEdge(mainMenuProcedureNode, menubarNode, true)
-      net.getDefaultEdgeTable().getRow(edge.getSUID()).set(CyNetwork.NAME, "menubar" as String)
+    if ( mainMenuProcedure ) {
+      def mainMenuProcedureNode = net.getNode(procedureNodeSuids[mainMenuProcedure])
+      def menubarNode = net.getNode(menuRootSuid)
+      if (mainMenuProcedureNode && menubarNode) {
+        def edge = net.addEdge(mainMenuProcedureNode, menubarNode, true)
+        net.getDefaultEdgeTable().getRow(edge.getSUID()).set(CyNetwork.NAME, "menubar" as String)
+      }
     }
   }
 
@@ -157,16 +157,16 @@ final class TxaNetworkBuilder {
       def row = table.getRow(procedureNodeSuids[procInfo.name])
 
       row.set(CyNetwork.NAME, procInfo.name)
-      row.set(NAMESPACE, NODETYPE.columnName, PROCEDURE.value)
-      row.set(NAMESPACE, TEMPLATE.columnName, procInfo.template)
-      row.set(NAMESPACE, NOEXPORT.columnName,!procInfo.isExported)
-      row.set(NAMESPACE, MAIN_PROCEDURE.columnName, procInfo.isMainProcedure)
+      row.set(NODETYPE.fqn, PROCEDURE.value)
+      row.set(TEMPLATE.fqn, procInfo.template)
+      row.set(NOEXPORT.fqn,!procInfo.isExported)
+      row.set(MAIN_PROCEDURE.fqn, procInfo.isMainProcedure)
     }
 
     menuNodeSuids.each { menuName, suid ->
       def row = table.getRow(suid)
       row.set(CyNetwork.NAME, menuName)
-      row.set(NAMESPACE,NODETYPE.columnName, MENU.value)
+      row.set(NODETYPE.fqn, MENU.value)
     }
   }
 }

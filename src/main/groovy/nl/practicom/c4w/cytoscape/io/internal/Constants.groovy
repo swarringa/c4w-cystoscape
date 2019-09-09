@@ -19,6 +19,29 @@ final class Constants {
       this.columnType = columnType
       this.immutable =  immutable
     }
+
+    def getFqn(){
+      "${NAMESPACE}::${columnName}"
+    }
+  }
+
+  final enum NetworkTableColumn {
+    SOURCETXA('source'),
+    TARGETTXA('target')
+
+    def columnName
+    def columnType
+    def immutable
+
+    NetworkTableColumn(columnName, columnType = String.class, immutable = true){
+      this.columnName = columnName
+      this.columnType = columnType
+      this.immutable =  immutable
+    }
+
+    def getFqn(){
+      "${NAMESPACE}::${columnName}"
+    }
   }
 
   final enum NodeType {

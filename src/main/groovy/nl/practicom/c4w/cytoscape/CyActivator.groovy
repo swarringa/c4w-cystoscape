@@ -3,7 +3,9 @@ package nl.practicom.c4w.cytoscape
 import nl.practicom.c4w.cytoscape.io.internal.txareader.CytoscapeTxaFileFilter
 import nl.practicom.c4w.cytoscape.io.internal.txareader.CytoscapeTxaNetworkReaderFactory
 import nl.practicom.c4w.cytoscape.io.internal.writer.TxaNetworkWriterFactory
+import nl.practicom.c4w.cytoscape.view.internal.SelectSubtreeViewContextMenuFactory
 import org.cytoscape.application.CyApplicationManager
+import org.cytoscape.application.swing.CyNodeViewContextMenuFactory
 import org.cytoscape.group.CyGroupFactory
 import org.cytoscape.io.DataCategory
 import org.cytoscape.io.read.InputStreamTaskFactory
@@ -88,5 +90,10 @@ class CyActivator extends AbstractCyActivator {
         reader_factory_properties.put(ID, "cytoscapeTxaNetworkReaderFactory")
         registerService(bc, txaReadeFactory, InputStreamTaskFactory.class, reader_factory_properties)
 
+
+        CyNodeViewContextMenuFactory txaNodeViewContextMenuFactory  = new SelectSubtreeViewContextMenuFactory();
+        Properties txaNodeViewContextMenuFactoryProps = new Properties();
+        txaNodeViewContextMenuFactoryProps.put("preferredMenu", "Select");
+        registerAllServices(bc, txaNodeViewContextMenuFactory, txaNodeViewContextMenuFactoryProps)
     }
 }

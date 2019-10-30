@@ -154,13 +154,17 @@ final class TxaNetworkBuilder {
     }
 
     procedureScanner.procedures.each { procInfo ->
-      def row = table.getRow(procedureNodeSuids[procInfo.name])
-
-      row.set(CyNetwork.NAME, procInfo.name)
-      row.set(NODETYPE.fqn, PROCEDURE.value)
-      row.set(TEMPLATE.fqn, procInfo.template)
-      row.set(NOEXPORT.fqn,!procInfo.isExported)
-      row.set(MAIN_PROCEDURE.fqn, procInfo.isMainProcedure)
+      try {
+        def row = table.getRow(procedureNodeSuids[procInfo.name])
+        row.set(CyNetwork.NAME, procInfo.name)
+        row.set(NODETYPE.fqn, PROCEDURE.value)
+        row.set(TEMPLATE.fqn, procInfo.template)
+        row.set(NOEXPORT.fqn, !procInfo.isExported)
+        row.set(MAIN_PROCEDURE.fqn, procInfo.isMainProcedure)
+      } catch ( Exception e){
+        print("Error adding row for $procInfo.name")
+        print(procInfo)
+      }
     }
 
     menuNodeSuids.each { menuName, suid ->

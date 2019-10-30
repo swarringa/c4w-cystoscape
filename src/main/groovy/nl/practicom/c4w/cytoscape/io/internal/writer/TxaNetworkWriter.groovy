@@ -1,6 +1,8 @@
 package nl.practicom.c4w.cytoscape.io.internal.writer
 
-import nl.practicom.c4w.multidll.DllTxaTransform
+import nl.practicom.c4w.multidll.ProcedureExtractor
+import nl.practicom.c4w.multidll.ProcedureTransformFactory
+import nl.practicom.c4w.multidll.SingleTxaProcedureWriter
 import nl.practicom.c4w.txa.transform.StreamingTxaReader
 import org.cytoscape.io.write.CyWriter
 import org.cytoscape.model.CyNetwork
@@ -51,10 +53,15 @@ class TxaNetworkWriter implements CyWriter {
         .getMatchingRows(NODETYPE.fqn, PROCEDURE.value)
         .inject([]){ procs, r -> procs << r.get(CyNetwork.NAME,String.class) }
 
-    def txaTansform = new DllTxaTransform(outputStream, publicProcedures, [], numProceduresPerModule)
+    def procedureWriter = new SingleTxaProcedureWriter(outputStream, false, numProceduresPerModule)
+
+    def transformFactory = new ProcedureTransformFactory()
+    transformFactory.publicProcedures = publicProcedures
+
+    def procedureExtractor = new ProcedureExtractor(transformFactory,procedureWriter)
 
     new StreamingTxaReader()
-      .withHandler(txaTansform)
+      .withHandler(procedureExtractor)
       .parse(new File(sourceTxa))
   }
 

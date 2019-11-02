@@ -76,3 +76,9 @@ publishing {
         }
     }
 }
+
+task cleanAll {
+    dependsOn gradle.includedBuilds*.task(':clean')
+    dependsOn clean
+}
+

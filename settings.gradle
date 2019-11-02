@@ -1,1 +1,4 @@
 rootProject.name = 'c4w-cytoscape'
+
+includeBuild '../c4w-multidll'
+includeBuild '../c4w-txa'

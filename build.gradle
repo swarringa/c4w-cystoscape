@@ -7,7 +7,7 @@ buildscript {
     dependencies {
         // See https://github.com/bndtools/bnd/tree/master/biz.aQute.bnd.gradle
         classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:4.3.0'
-
+        // See https://github.com/lburgazzoli/gradle-karaf-plugin
         classpath "gradle.plugin.com.github.lburgazzoli:gradle-karaf-plugin:0.0.49"
     }
 }

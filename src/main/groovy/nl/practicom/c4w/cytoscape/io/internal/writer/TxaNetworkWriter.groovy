@@ -1,8 +1,8 @@
 package nl.practicom.c4w.cytoscape.io.internal.writer
 
-import nl.practicom.c4w.multidll.ProcedureExtractor
-import nl.practicom.c4w.multidll.ProcedureListTransformFactory
-import nl.practicom.c4w.multidll.SingleTxaProcedureWriter
+import nl.practicom.c4w.multidll.transforms.procedure.ProcedureExtractor
+import nl.practicom.c4w.multidll.transforms.procedure.ProcedureListTransformFactory
+import nl.practicom.c4w.multidll.io.SingleTxaProcedureWriter
 import nl.practicom.c4w.txa.transform.StreamingTxaReader
 import org.cytoscape.io.write.CyWriter
 import org.cytoscape.model.CyNetwork

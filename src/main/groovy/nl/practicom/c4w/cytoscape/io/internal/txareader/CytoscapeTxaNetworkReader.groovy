@@ -2,9 +2,9 @@ package nl.practicom.c4w.cytoscape.io.internal.txareader
 
 
 import nl.practicom.c4w.cytoscape.io.internal.impex.TxaNetworkBuilder
-import nl.practicom.c4w.multidll.EntryProcedureScanner
-import nl.practicom.c4w.multidll.ProcedureDependencyScanner
-import nl.practicom.c4w.multidll.ProcedureInfoScanner
+import nl.practicom.c4w.multidll.scanners.EntryProcedureScanner
+import nl.practicom.c4w.multidll.scanners.ProcedureDependencyScanner
+import nl.practicom.c4w.multidll.scanners.ProcedureInfoScanner
 import nl.practicom.c4w.txa.transform.StreamingTxaReader
 import org.cytoscape.application.CyApplicationManager
 import org.cytoscape.group.CyGroupFactory

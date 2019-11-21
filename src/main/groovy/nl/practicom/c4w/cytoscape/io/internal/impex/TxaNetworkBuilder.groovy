@@ -1,9 +1,9 @@
 package nl.practicom.c4w.cytoscape.io.internal.impex
 
 import nl.practicom.c4w.cytoscape.io.internal.Constants
-import nl.practicom.c4w.multidll.EntryProcedureScanner
-import nl.practicom.c4w.multidll.ProcedureDependencyScanner
-import nl.practicom.c4w.multidll.ProcedureInfoScanner
+import nl.practicom.c4w.multidll.scanners.EntryProcedureScanner
+import nl.practicom.c4w.multidll.scanners.ProcedureDependencyScanner
+import nl.practicom.c4w.multidll.scanners.ProcedureInfoScanner
 import org.cytoscape.model.CyNetwork
 import org.cytoscape.model.CyNode
 import org.cytoscape.model.CyTable

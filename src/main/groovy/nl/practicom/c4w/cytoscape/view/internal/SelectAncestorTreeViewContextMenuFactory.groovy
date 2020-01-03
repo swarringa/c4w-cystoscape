@@ -12,11 +12,10 @@ import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 
 /**
- * Provides Select > Subtree context menu item for nodes which
- * highlights all descendant nodes reachable from the selected
- * node
+ * Provides Select > Ancestors context menu item for nodes which
+ * highlights all nodes from which the selected node can be reached
  */
-class SelectSubtreeViewContextMenuFactory implements CyNodeViewContextMenuFactory, ActionListener {
+class SelectAncestorTreeViewContextMenuFactory implements CyNodeViewContextMenuFactory, ActionListener {
 
   private CyNetworkView netView
   private View<CyNode> nodeView
@@ -25,7 +24,7 @@ class SelectSubtreeViewContextMenuFactory implements CyNodeViewContextMenuFactor
   CyMenuItem createMenuItem(CyNetworkView netView, View<CyNode> nodeView) {
       this.netView = netView
       this.nodeView = nodeView
-      JMenuItem menuItem = new JMenuItem("Descendants")
+      JMenuItem menuItem = new JMenuItem("Ancestors")
       menuItem.addActionListener(this)
       CyMenuItem cyMenuItem = new CyMenuItem(menuItem, 0)
       return cyMenuItem
@@ -36,22 +35,22 @@ class SelectSubtreeViewContextMenuFactory implements CyNodeViewContextMenuFactor
     def net = this.netView.model
     def selectedNode = nodeView.model
 
-    def descendantNodes = descendants([] as Set,net,selectedNode)
-    def descendantRows = descendantNodes.collect {node ->  net.defaultNodeTable.getRow(node.SUID)}
-    descendantRows.each { row -> row.set(CyNetwork.SELECTED, true) }
+    def ancestorNodes = ancestors([] as Set,net,selectedNode)
+    def ancestorRows = ancestorNodes.collect {node ->  net.defaultNodeTable.getRow(node.SUID)}
+    ancestorRows.each { row -> row.set(CyNetwork.SELECTED, true) }
   }
 
-  Set<CyNode> descendants(Set<CyNode> visitedNodes, CyNetwork net, CyNode node){
-    def children = childNodes(net,node)
+  Set<CyNode> ancestors(Set<CyNode> visitedNodes, CyNetwork net, CyNode node){
+    def parents = parentNodes(net,node)
     // children - visitedNodes should eventually become [] and prevent non-termination due to cycles
-    visitedNodes + children + (children - visitedNodes).collect {
-      descendants(visitedNodes+children as Set, net, it)
+    visitedNodes + parents + (parents - visitedNodes).collect {
+      ancestors(visitedNodes+parents as Set, net, it)
     }.flatten() as Set<CyNode>
   }
 
-  Set<CyNode> childNodes(CyNetwork net, CyNode node) {
+  Set<CyNode> parentNodes(CyNetwork net, CyNode node) {
     net.edgeList
-      .findAll { e1 -> e1.source.SUID == node.SUID }
-      .collect { e2 -> net.getNode(e2.target.SUID) }
+      .findAll { e1 -> e1.target.SUID == node.SUID }
+      .collect { e2 -> net.getNode(e2.source.SUID) }
   }
 }

@@ -58,7 +58,7 @@ class CyActivator extends AbstractCyActivator {
         /** Provided services */
 
         final CytoscapeTxaFileFilter txaFilter = new CytoscapeTxaFileFilter(
-          ['txa'] as Set<String>,
+          ['txa','TXA'] as Set<String>,
           ['text/plain'] as Set<String>,
           "Clarion TXA file",
           DataCategory.NETWORK,

@@ -21,11 +21,13 @@ plugins {
 apply plugin: 'biz.aQute.bnd.builder'
 
 group 'nl.practicom'
-version '0.1'
+version '1.0'
 
 ext {
     osgiVersion = '4.2.0'
-    cytoscapeVersion = '3.7.1'
+    cw4MultiDllVersion = '1.0'
+    c4wTxaVersion = '1.0'
+    cytoscapeVersion = '3.7.2'
     slf4jVersion = '1.6.1'
     groovyVersion = '2.4.17'
 }
@@ -71,16 +73,16 @@ dependencies {
     compile "org.cytoscape:io-impl:$cytoscapeVersion"
     compile "org.osgi:org.osgi.core:$osgiVersion"
     compile "org.osgi:org.osgi.util.tracker:1.5.2"
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.28'
-    compile "nl.practicom:c4w-multidll:0.1"
-    compile "nl.practicom:c4w-txa:0.1"
-    testCompile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.28'
+    compile "org.slf4j:slf4j-api:1.7.28"
+    compile "nl.practicom:c4w-multidll:$cw4MultiDllVersion"
+    compile "nl.practicom:c4w-txa:$c4wTxaVersion"
+    testCompile "org.slf4j:slf4j-simple:1.7.28"
     testCompile "junit:junit:4.12"
 
     // Configuration specifies stuff to be bundled. This is to prevent
     // the inclusion of the cytoscape dependencies
-    bundle "nl.practicom:c4w-multidll:$version"
-    bundle "nl.practicom:c4w-txa:$version"
+    bundle "nl.practicom:c4w-multidll:$cw4MultiDllVersion"
+    bundle "nl.practicom:c4w-txa:$c4wTxaVersion"
     bundle "org.codehaus.groovy:groovy:$groovyVersion"
 }
 
@@ -142,8 +144,11 @@ publishing {
     }
 }
 
+task publishAllToMavenLocal {
+    dependsOn gradle.includedBuilds*.task(':publishToMavenLocal'), publishToMavenLocal
+}
+
 task cleanAll {
     dependsOn gradle.includedBuilds*.task(':clean')
     dependsOn clean
 }
-

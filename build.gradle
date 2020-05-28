@@ -27,7 +27,7 @@ ext {
     osgiVersion = '4.2.0'
     cw4MultiDllVersion = '1.0'
     c4wTxaVersion = '1.0'
-    cytoscapeVersion = '3.7.2'
+    cytoscapeVersion = '3.7.1'
     slf4jVersion = '1.6.1'
     groovyVersion = '2.4.17'
 }

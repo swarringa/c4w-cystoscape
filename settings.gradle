@@ -1,3 +1,27 @@
+pluginManagement {
+    resolutionStrategy {
+        eachPlugin {
+            // Fixes: could not resolve plugin artifact 'com.github.lburgazzoli.karaf:com.github.lburgazzoli.karaf.gradle.plugin:0.5.3-SNAPSHOT'
+            if (requested.id.namespace == 'com.github.lburgazzoli') {
+                useModule('com.github.lburgazzoli:gradle-karaf-plugin:0.5.3-SNAPSHOT')
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/swarringa/gradle-karaf-plugin")
+            credentials {
+                username = 'swarringa' //project.findProperty("gpr.user") ?: System.getenv("GPR_USERNAME")
+                password = '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' //project.findProperty("gpr.token") ?: System.getenv("GPR_TOKEN")
+            }
+        }
+	    mavenLocal()
+	    gradlePluginPortal()
+    }
+}
+
 rootProject.name = 'cytoscape-txa-analysis'
 includeBuild '../c4w-multidll'
-includeBuild '../c4w-txa'
+includeBuild '../c4w-txa-parser'
+

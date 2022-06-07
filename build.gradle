@@ -1,24 +1,17 @@
-import aQute.bnd.gradle.Bundle
-
 buildscript {
     repositories {
+        mavenLocal()
         mavenCentral()
-    }
-    dependencies {
-        // See https://github.com/bndtools/bnd/tree/master/biz.aQute.bnd.gradle
-        classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:4.3.0'
-        // See https://github.com/lburgazzoli/gradle-karaf-plugin
-        classpath "gradle.plugin.com.github.lburgazzoli:gradle-karaf-plugin:0.0.49"
     }
 }
 
 plugins {
     id 'groovy'
     id 'maven-publish'
-    id 'com.github.lburgazzoli.karaf' version '0.0.49'
+    id "com.github.lburgazzoli.karaf" version "0.5.3-SNAPSHOT"
+    id "biz.aQute.bnd.builder" version "6.2.0"
 }
 
-apply plugin: 'biz.aQute.bnd.builder'
 
 group 'nl.practicom'
 version '1.0'
@@ -27,7 +20,7 @@ ext {
     osgiVersion = '4.2.0'
     cw4MultiDllVersion = '1.0'
     c4wTxaVersion = '1.0'
-    cytoscapeVersion = '3.7.1'
+    cytoscapeVersion = '3.9.0'
     slf4jVersion = '1.6.1'
     groovyVersion = '2.4.17'
 }
@@ -36,48 +29,56 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven {
-        name ='Cytoscape releases'
-        url = 'http://code.cytoscape.org/nexus/content/repositories/releases'
+        name = 'Cytoscape releases'
+        url = 'https://nrnb-nexus.ucsd.edu/repository/cytoscape_releases/'
     }
     maven {
         name = 'Cytoscape snapshots'
-        url = 'http://code.cytoscape.org/nexus/content/repositories/snapshots/'
-    }
-    // This is a hack! org.cytoscape:io-impl depends
-    // on cytoscape-temp:opencsv-2.1 but this package
-    // is not available from the cytoscape repos. Therefore
-    // we use a downloaded artifact installed in lib
-    flatDir {
-        name = "locallib"
-        dirs './lib'
+        url = 'https://nrnb-nexus.ucsd.edu/repository/cytoscape_snapshots/'
     }
 }
 
+
 configurations {
+    // Unresolvable transitive compile dependencies to be excluded
+    implementation {
+        exclude group: "cytoscape-temp"
+        // See https://issues.apache.org/jira/browse/KARAF-6462
+        exclude group: 'org.knopflerfish.kf6'
+    }
+
     bundle {
+        // Only put our own stuff in the bundle
         transitive = false
     }
 }
 
 dependencies {
-    compile "org.codehaus.groovy:groovy:$groovyVersion"
-    compile "org.cytoscape:swing-application-api:$cytoscapeVersion"
-    compile "org.cytoscape:app-api:$cytoscapeVersion"
-    compile "org.cytoscape:work-api:$cytoscapeVersion"
-    compile "org.cytoscape:work-impl:$cytoscapeVersion"
-    compile "org.cytoscape:work-swing-api:$cytoscapeVersion"
-    compile "org.cytoscape:work-swing-impl:$cytoscapeVersion"
-    compile "org.cytoscape:work-headless-impl:$cytoscapeVersion"
-    compile "org.cytoscape:service-api:$cytoscapeVersion"
-    compile "org.cytoscape:io-api:$cytoscapeVersion"
-    compile "org.cytoscape:io-impl:$cytoscapeVersion"
-    compile "org.osgi:org.osgi.core:$osgiVersion"
-    compile "org.osgi:org.osgi.util.tracker:1.5.2"
-    compile "org.slf4j:slf4j-api:1.7.28"
-    compile "nl.practicom:c4w-multidll:$cw4MultiDllVersion"
-    compile "nl.practicom:c4w-txa:$c4wTxaVersion"
-    testCompile "org.slf4j:slf4j-simple:1.7.28"
-    testCompile "junit:junit:4.12"
+    // Groovy
+    implementation "org.codehaus.groovy:groovy:$groovyVersion"
+    // Cytoscape
+    implementation "org.cytoscape:swing-application-api:$cytoscapeVersion"
+    implementation "org.cytoscape:app-api:$cytoscapeVersion"
+    implementation "org.cytoscape:work-api:$cytoscapeVersion"
+    implementation "org.cytoscape:work-impl:$cytoscapeVersion"
+    implementation "org.cytoscape:work-swing-api:$cytoscapeVersion"
+    implementation "org.cytoscape:work-swing-impl:$cytoscapeVersion"
+    implementation "org.cytoscape:work-headless-impl:$cytoscapeVersion"
+    implementation "org.cytoscape:service-api:$cytoscapeVersion"
+    implementation "org.cytoscape:io-api:$cytoscapeVersion"
+    implementation "org.cytoscape:io-impl:$cytoscapeVersion"
+    // OSGI (Karaf)
+    implementation "org.osgi:org.osgi.core:$osgiVersion"
+    implementation "org.osgi:org.osgi.util.tracker:1.5.2"
+    implementation "org.slf4j:slf4j-api:1.7.28"
+    // Mine
+    implementation "nl.practicom:c4w-multidll:$cw4MultiDllVersion"
+    implementation "nl.practicom:c4w-txa:$c4wTxaVersion"
+    // Other
+    implementation 'com.google.guava:guava:30.1.1-jre'
+    // Testing
+    testImplementation "org.slf4j:slf4j-simple:1.7.28"
+    testImplementation "junit:junit:4.12"
 
     // Configuration specifies stuff to be bundled. This is to prevent
     // the inclusion of the cytoscape dependencies
@@ -86,17 +87,19 @@ dependencies {
     bundle "org.codehaus.groovy:groovy:$groovyVersion"
 }
 
+
 jar {
     // This can be placed in a bnd.bnd file. But it is more convenient
     // to keep everything together here
-    bnd (
-        'Bundle-Name'           : 'Practicom :: Cytoscape TXA analysis',
-        'Bundle-SymbolicName'   : 'nl.practicom.c4w.cytoscape',
-        'Bundle-Activator'      : 'nl.practicom.c4w.cytoscape.CyActivator',
-        'Export-Package'        : "nl.practicom.c4w.cytoscape.*;ver=${version}" ,
-        '-exportcontents'       : 'nl.practicom.c4w.cytoscape.*'
-
-    )
+    bundle {
+        bnd (
+            'Bundle-Name'           : 'Practicom :: Cytoscape TXA analysis',
+            'Bundle-SymbolicName'   : 'nl.practicom.c4w.cytoscape',
+            'Bundle-Activator'      : 'nl.practicom.c4w.cytoscape.CyActivator',
+            'Export-Package'        : "nl.practicom.c4w.cytoscape.*;ver=${version}" ,
+            '-exportcontents'       : 'nl.practicom.c4w.cytoscape.*'
+        )
+    }
 }
 
 /*
@@ -122,7 +125,7 @@ karaf {
 }
 
 /* Generate the OSGI manifest. See also the bnd instructions on jar above */
-task bundle(type: Bundle) {
+task bundle(type: aQute.bnd.gradle.Bundle) {
     from sourceSets.main.output
 }
 
@@ -137,8 +140,11 @@ publishing {
         }
         /* The karaf feature repository */
         osgiFeature(MavenPublication){
-            artifact("build/karaf/features/${rootProject.name}-${version}.xml") {
-                artifactId 'features'
+            artifact("build/karaf/features/${rootProject.name}-${version}-features.xml") {
+                artifactId 'cytoscape-txa-analysis'
+		classifier 'features'
+		//type 'xml'
+		//pom { packaging 'xml' }
             }
         }
     }

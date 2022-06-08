@@ -1,4 +1,4 @@
-package nl.practicom.c4w.cytoscape.io.internal
+package nl.intreq.c4w.cytoscape.io.internal
 
 final class Constants {
 

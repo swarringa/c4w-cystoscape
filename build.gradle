@@ -17,7 +17,7 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
-group 'nl.practicom'
+group 'nl.intreq'
 version '1.0'
 
 ext {
@@ -76,8 +76,8 @@ dependencies {
     implementation "org.osgi:org.osgi.util.tracker:1.5.2"
     implementation "org.slf4j:slf4j-api:1.7.28"
     // Mine
-    implementation "nl.practicom:c4w-multidll:$cw4MultiDllVersion"
-    implementation "nl.practicom:c4w-txa:$c4wTxaVersion"
+    implementation "nl.intreq:c4w-multidll:$cw4MultiDllVersion"
+    implementation "nl.intreq:c4w-txa-parser:$c4wTxaVersion"
     // Other
     implementation 'com.google.guava:guava:30.1.1-jre'
     // Testing
@@ -86,8 +86,8 @@ dependencies {
 
     // Configuration specifies stuff to be bundled. This is to prevent
     // the inclusion of the cytoscape dependencies
-    bundle "nl.practicom:c4w-multidll:$cw4MultiDllVersion"
-    bundle "nl.practicom:c4w-txa:$c4wTxaVersion"
+    bundle "nl.intreq:c4w-multidll:$cw4MultiDllVersion"
+    bundle "nl.intreq:c4w-txa-parser:$c4wTxaVersion"
     bundle "org.codehaus.groovy:groovy:$groovyVersion"
 }
 
@@ -97,11 +97,11 @@ jar {
     // to keep everything together here
     bundle {
         bnd (
-            'Bundle-Name'           : 'Practicom :: Cytoscape TXA analysis',
-            'Bundle-SymbolicName'   : 'nl.practicom.c4w.cytoscape',
-            'Bundle-Activator'      : 'nl.practicom.c4w.cytoscape.CyActivator',
-            'Export-Package'        : "nl.practicom.c4w.cytoscape.*;ver=${version}" ,
-            '-exportcontents'       : 'nl.practicom.c4w.cytoscape.*'
+            'Bundle-Name'           : 'Intreq :: Cytoscape TXA analysis',
+            'Bundle-SymbolicName'   : 'nl.intreq.c4w.cytoscape',
+            'Bundle-Activator'      : 'nl.intreq.c4w.cytoscape.CyActivator',
+            'Export-Package'        : "nl.intreq.c4w.cytoscape.*;ver=${version}" ,
+            '-exportcontents'       : 'nl.intreq.c4w.cytoscape.*'
         )
     }
 }
@@ -113,16 +113,17 @@ jar {
 karaf {
     features {
         // name of the feature 'repository' itself
-        name = 'practicom'
+        name = 'intreq'
 
         // includes the jar produced by this project
         // Problem: this will use the rootProject.name and generates
-        // mvn:nl.practicom/cytoscape-txa-analysis/0.1 as the bundle name.
+        // mvn:nl.intreq/cytoscape-txa-analysis/0.1 as the bundle name.
         includeProject = true
 
         // include all dependencies from the 'bundle' configuration
         feature {
             name = 'cytoscape-txa-analysis'
+            description = 'Clarion for windows procedure graph analyzer'
             configurations 'bundle'
         }
     }
@@ -146,9 +147,9 @@ publishing {
         osgiFeature(MavenPublication){
             artifact("build/karaf/features/${rootProject.name}-${version}-features.xml") {
                 artifactId 'cytoscape-txa-analysis'
-		classifier 'features'
-		//type 'xml'
-		//pom { packaging 'xml' }
+		        classifier 'features'
+		        //type 'xml'
+		        //pom { packaging = 'xml' }
             }
         }
     }

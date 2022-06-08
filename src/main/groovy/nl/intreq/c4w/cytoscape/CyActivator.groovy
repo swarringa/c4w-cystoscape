@@ -1,10 +1,10 @@
-package nl.practicom.c4w.cytoscape
+package nl.intreq.c4w.cytoscape
 
-import nl.practicom.c4w.cytoscape.io.internal.txareader.CytoscapeTxaFileFilter
-import nl.practicom.c4w.cytoscape.io.internal.txareader.CytoscapeTxaNetworkReaderFactory
-import nl.practicom.c4w.cytoscape.io.internal.writer.TxaNetworkWriterFactory
-import nl.practicom.c4w.cytoscape.view.internal.SelectAncestorTreeViewContextMenuFactory
-import nl.practicom.c4w.cytoscape.view.internal.SelectSubtreeViewContextMenuFactory
+import nl.intreq.c4w.cytoscape.io.internal.txareader.CytoscapeTxaFileFilter
+import nl.intreq.c4w.cytoscape.io.internal.txareader.CytoscapeTxaNetworkReaderFactory
+import nl.intreq.c4w.cytoscape.io.internal.writer.TxaNetworkWriterFactory
+import nl.intreq.c4w.cytoscape.view.internal.SelectAncestorTreeViewContextMenuFactory
+import nl.intreq.c4w.cytoscape.view.internal.SelectSubtreeViewContextMenuFactory
 import org.cytoscape.application.CyApplicationManager
 import org.cytoscape.application.swing.CyNodeViewContextMenuFactory
 import org.cytoscape.group.CyGroupFactory

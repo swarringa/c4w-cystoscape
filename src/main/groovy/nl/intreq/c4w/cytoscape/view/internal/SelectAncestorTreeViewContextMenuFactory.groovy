@@ -1,4 +1,4 @@
-package nl.practicom.c4w.cytoscape.view.internal
+package nl.intreq.c4w.cytoscape.view.internal
 
 import org.cytoscape.application.swing.CyMenuItem
 import org.cytoscape.application.swing.CyNodeViewContextMenuFactory

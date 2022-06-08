@@ -1,4 +1,4 @@
-package nl.practicom.c4w.cytoscape.io.internal.writer
+package nl.intreq.c4w.cytoscape.io.internal.writer
 
 import org.cytoscape.io.CyFileFilter
 import org.cytoscape.io.write.CyNetworkViewWriterFactory

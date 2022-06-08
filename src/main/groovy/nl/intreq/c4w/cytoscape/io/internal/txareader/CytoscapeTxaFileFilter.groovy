@@ -1,4 +1,4 @@
-package nl.practicom.c4w.cytoscape.io.internal.txareader
+package nl.intreq.c4w.cytoscape.io.internal.txareader
 
 import org.cytoscape.io.BasicCyFileFilter
 import org.cytoscape.io.DataCategory

@@ -1,11 +1,11 @@
-package nl.practicom.c4w.cytoscape.io.internal.txareader
+package nl.intreq.c4w.cytoscape.io.internal.txareader
 
 
-import nl.practicom.c4w.cytoscape.io.internal.impex.TxaNetworkBuilder
-import nl.practicom.c4w.multidll.scanners.EntryProcedureScanner
-import nl.practicom.c4w.multidll.scanners.ProcedureDependencyScanner
-import nl.practicom.c4w.multidll.scanners.ProcedureInfoScanner
-import nl.practicom.c4w.txa.transform.StreamingTxaReader
+import nl.intreq.c4w.cytoscape.io.internal.impex.TxaNetworkBuilder
+import nl.intreq.c4w.multidll.scanners.EntryProcedureScanner
+import nl.intreq.c4w.multidll.scanners.ProcedureDependencyScanner
+import nl.intreq.c4w.multidll.scanners.ProcedureInfoScanner
+import nl.intreq.c4w.txa.transform.StreamingTxaReader
 import org.cytoscape.application.CyApplicationManager
 import org.cytoscape.group.CyGroupFactory
 import org.cytoscape.io.read.AbstractCyNetworkReader
@@ -32,8 +32,8 @@ import org.cytoscape.work.Tunable
 import java.awt.*
 import java.util.List
 
-import static nl.practicom.c4w.cytoscape.io.internal.Constants.NAMESPACE
-import static nl.practicom.c4w.cytoscape.io.internal.Constants.NetworkTableColumn.SOURCETXA
+import static nl.intreq.c4w.cytoscape.io.internal.Constants.NAMESPACE
+import static nl.intreq.c4w.cytoscape.io.internal.Constants.NetworkTableColumn.SOURCETXA
 
 class CytoscapeTxaNetworkReader extends AbstractCyNetworkReader {
 

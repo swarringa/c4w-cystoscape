@@ -1,17 +1,17 @@
-package nl.practicom.c4w.cytoscape.io.internal.impex
+package nl.intreq.c4w.cytoscape.io.internal.impex
 
-import nl.practicom.c4w.cytoscape.io.internal.Constants
-import nl.practicom.c4w.multidll.scanners.EntryProcedureScanner
-import nl.practicom.c4w.multidll.scanners.ProcedureDependencyScanner
-import nl.practicom.c4w.multidll.scanners.ProcedureInfoScanner
+import nl.intreq.c4w.cytoscape.io.internal.Constants
+import nl.intreq.c4w.multidll.scanners.EntryProcedureScanner
+import nl.intreq.c4w.multidll.scanners.ProcedureDependencyScanner
+import nl.intreq.c4w.multidll.scanners.ProcedureInfoScanner
 import org.cytoscape.model.CyNetwork
 import org.cytoscape.model.CyNode
 import org.cytoscape.model.CyTable
 
-import static nl.practicom.c4w.cytoscape.io.internal.Constants.NAMESPACE
-import static nl.practicom.c4w.cytoscape.io.internal.Constants.NodeType.MENU
-import static nl.practicom.c4w.cytoscape.io.internal.Constants.NodeType.PROCEDURE
-import static nl.practicom.c4w.cytoscape.io.internal.Constants.ProcedureTableColumn.*
+import static nl.intreq.c4w.cytoscape.io.internal.Constants.NAMESPACE
+import static nl.intreq.c4w.cytoscape.io.internal.Constants.NodeType.MENU
+import static nl.intreq.c4w.cytoscape.io.internal.Constants.NodeType.PROCEDURE
+import static nl.intreq.c4w.cytoscape.io.internal.Constants.ProcedureTableColumn.*
 
 final class TxaNetworkBuilder {
 

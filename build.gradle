@@ -12,6 +12,10 @@ plugins {
     id "biz.aQute.bnd.builder" version "6.2.0"
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
 
 group 'nl.practicom'
 version '1.0'

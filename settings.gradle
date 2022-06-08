@@ -12,8 +12,8 @@ pluginManagement {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/swarringa/gradle-karaf-plugin")
             credentials {
-                username = 'swarringa' //project.findProperty("gpr.user") ?: System.getenv("GPR_USERNAME")
-                password = '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' //project.findProperty("gpr.token") ?: System.getenv("GPR_TOKEN")
+                username = System.getenv("GPR_USERNAME")
+                password = System.getenv("GPR_TOKEN")
             }
         }
 	    mavenLocal()
